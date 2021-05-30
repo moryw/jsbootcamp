@@ -1,4 +1,9 @@
+const bcrypt = require('bcrypt');
 const path = require('path');
+
+const redis = require('redis');
+const client = redis.createClient()
+
 const express = require('express')
 const app = express()
 
@@ -19,7 +24,20 @@ app.post('/', (req, res) => {
       message: 'Please give us both a username and password'
     })
   }
-  res.render('success')
+
+  client.hget('users', username, (err, userid) => {
+    if (!userid) {
+      client.incr('userid', async (err, userid) => {
+        client.hset('users', username, userid)
+        const saltRounds = 10
+        const hash =  await bcrypt.hash(password, saltRounds)
+        client.hset(`user:${userid}`, 'hash', hash, 'username', username)
+      })
+    } else {
+
+    }
+  })
+
   res.end()
 })
 
