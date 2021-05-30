@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const session = require('express-session')
 const path = require('path');
 
 const redis = require('redis');
@@ -23,10 +24,14 @@ app.post('/', (req, res) => {
     res.render('error', {
       message: 'Please give us both a username and password'
     })
+    return
   }
+
+
 
   client.hget('users', username, (err, userid) => {
     if (!userid) {
+      // if new user, automatically sign them up
       client.incr('userid', async (err, userid) => {
         client.hset('users', username, userid)
         const saltRounds = 10
@@ -34,7 +39,14 @@ app.post('/', (req, res) => {
         client.hset(`user:${userid}`, 'hash', hash, 'username', username)
       })
     } else {
+      client.hget(`user:${userid}`, 'hash', async (err, hash) => {
+        const passGood = await bcrypt.compare(password, hash)
+        if (passGood) {
 
+        } else {
+
+        }
+      })
     }
   })
 
