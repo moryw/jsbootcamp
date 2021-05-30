@@ -1,0 +1,23 @@
+{
+  "name": "twopper",
+  "version": "1.0.0",
+  "description": "A knock off tweeter app.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moryw/jsbootcamp.git"
+  },
+  "author": "Mory.W",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/moryw/jsbootcamp/issues"
+  },
+  "homepage": "https://github.com/moryw/jsbootcamp#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "redis": "^3.1.2"
+  }
+}
