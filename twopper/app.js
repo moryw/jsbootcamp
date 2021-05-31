@@ -31,7 +31,11 @@ app.set('views', path.join(__dirname, 'views'))
 
 app.get('/', (req, res) => {
   if (req.session.userid) {
-    res.render('dashboard')
+    client.hkeys('users', (err, users) => {
+      res.render('dashboard', {
+        users,
+      })
+    })
   } else {
     res.render('login')
   }
@@ -47,10 +51,10 @@ app.post('/', (req, res) => {
     return
   }
 
-  const saveSessionAndRenderDashboard = userid => {
+  const saveSessionAndRenderDashboard = (userid) => {
     req.session.userid = userid
     req.session.save()
-    res.render('dashboard')
+    res.redirect('/')
   }
 
   const handleSignup = (username, password) => {
@@ -84,6 +88,55 @@ app.post('/', (req, res) => {
       handleLogin(userid, password)
     }
   })
+})
+
+app.get('/post', (req, res) => {
+  if (req.session.userid) {
+    res.render("post")
+  } else {
+    res.render("login")
+  }
+})
+
+app.post('/post', (req, res) => {
+  if (!req.session.userid) {
+    res.render('login')
+    return
+  }
+
+  const { message } = req.body
+
+  client.incr('postid', async (err, postid) => {
+    client.hmset(
+      `post: ${postid}`,
+      'userid', req.session.userid,
+      'message', message,
+      'timestamp', Date.now()
+    )
+    res.redirect('/')
+  })
+
+})
+
+app.post('/follow', (req, res) => {
+  if (!req.session.userid) {
+    res.render("login")
+    return
+  }
+
+  const { username } = req.body
+
+  client.hget(
+    `user:${req.session.userid}`,
+    'username',
+    (err, currentUsername) => {
+      client.sadd(`following:${currentUsername}`, username)
+      client.sadd(`followers:${username}`, currentUsername)
+    }
+  )
+
+  res.redirect('/')
+
 })
 
 app.listen(3000, () => console.log('Server is running!!!'))
