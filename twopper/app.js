@@ -31,11 +31,19 @@ app.set('views', path.join(__dirname, 'views'))
 
 app.get('/', (req, res) => {
   if (req.session.userid) {
-    client.hkeys('users', (err, users) => {
-      res.render('dashboard', {
-        users,
-      })
-    })
+    client.hget(
+      `userid:${req.session.userid}`,
+      'username',
+      (err, currentUsername) => {
+        clients.smembers(`following:`)
+      }
+    )
+
+    // client.hkeys('users', (err, users) => {
+    //   res.render('dashboard', {
+    //     users,
+    //   })
+    // })
   } else {
     res.render('login')
   }
